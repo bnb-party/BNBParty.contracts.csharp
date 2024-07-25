@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <PackageId>BNBParty.contracts.csharp</PackageId>
     <Title>Contracts for BNBParty .NET</Title>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Authors>darkarki83</Authors>
     <Company>The-Poolz</Company>
     <Product>Contracts for BNBParty on .Net</Product>
