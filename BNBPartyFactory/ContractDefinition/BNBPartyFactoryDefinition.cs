@@ -1,9 +1,18 @@
+using System;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.Numerics;
+using Nethereum.Hex.HexTypes;
 using Nethereum.ABI.FunctionEncoding.Attributes;
+using Nethereum.RPC.Eth.DTOs;
+using Nethereum.Contracts.CQS;
 using Nethereum.Contracts;
+using System.Threading;
 
 namespace BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition
 {
+
+
     public partial class BNBPartyFactoryDeployment : BNBPartyFactoryDeploymentBase
     {
         public BNBPartyFactoryDeployment() : base(BYTECODE) { }
@@ -15,28 +24,10 @@ namespace BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition
         public static string BYTECODE = string.Empty;
         public BNBPartyFactoryDeploymentBase() : base(BYTECODE) { }
         public BNBPartyFactoryDeploymentBase(string byteCode) : base(byteCode) { }
-        [Parameter("uint256", "_partyTarget", 1)]
-        public BigInteger PartyTarget { get; set; }
-        [Parameter("uint256", "_createTokenFee", 2)]
-        public BigInteger CreateTokenFee { get; set; }
-        [Parameter("uint24", "_partyLpFee", 3)]
-        public uint PartyLpFee { get; set; }
-        [Parameter("uint24", "_lpFee", 4)]
-        public uint LpFee { get; set; }
-        [Parameter("uint256", "_initialTokenAmount", 5)]
-        public BigInteger InitialTokenAmount { get; set; }
-        [Parameter("uint160", "_sqrtPriceX96", 6)]
-        public BigInteger SqrtPriceX96 { get; set; }
-        [Parameter("address", "_WBNB", 7)]
-        public string Wbnb { get; set; }
-        [Parameter("uint256", "_bonusTargetReach", 8)]
-        public BigInteger BonusTargetReach { get; set; }
-        [Parameter("uint256", "_bonusPartyCreator", 9)]
-        public BigInteger BonusPartyCreator { get; set; }
-        [Parameter("int24", "_tickLower", 10)]
-        public int TickLower { get; set; }
-        [Parameter("int24", "_tickUpper", 11)]
-        public int TickUpper { get; set; }
+        [Parameter("tuple", "_party", 1)]
+        public virtual Party Party { get; set; }
+        [Parameter("address", "_WBNB", 2)]
+        public virtual string Wbnb { get; set; }
     }
 
     public partial class BNBPositionManagerFunction : BNBPositionManagerFunctionBase { }
@@ -55,39 +46,15 @@ namespace BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition
 
     }
 
-    public partial class BonusPartyCreatorFunction : BonusPartyCreatorFunctionBase { }
-
-    [Function("bonusPartyCreator", "uint256")]
-    public class BonusPartyCreatorFunctionBase : FunctionMessage
-    {
-
-    }
-
-    public partial class BonusTargetReachFunction : BonusTargetReachFunctionBase { }
-
-    [Function("bonusTargetReach", "uint256")]
-    public class BonusTargetReachFunctionBase : FunctionMessage
-    {
-
-    }
-
     public partial class CreatePartyFunction : CreatePartyFunctionBase { }
 
     [Function("createParty", "address")]
     public class CreatePartyFunctionBase : FunctionMessage
     {
         [Parameter("string", "name", 1)]
-        public string Name { get; set; }
+        public virtual string Name { get; set; }
         [Parameter("string", "symbol", 2)]
-        public string Symbol { get; set; }
-    }
-
-    public partial class CreateTokenFeeFunction : CreateTokenFeeFunctionBase { }
-
-    [Function("createTokenFee", "uint256")]
-    public class CreateTokenFeeFunctionBase : FunctionMessage
-    {
-
+        public virtual string Symbol { get; set; }
     }
 
     public partial class HandleSwapFunction : HandleSwapFunctionBase { }
@@ -96,15 +63,7 @@ namespace BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition
     public class HandleSwapFunctionBase : FunctionMessage
     {
         [Parameter("address", "recipient", 1)]
-        public string Recipient { get; set; }
-    }
-
-    public partial class InitialTokenAmountFunction : InitialTokenAmountFunctionBase { }
-
-    [Function("initialTokenAmount", "uint256")]
-    public class InitialTokenAmountFunctionBase : FunctionMessage
-    {
-
+        public virtual string Recipient { get; set; }
     }
 
     public partial class IsPartyFunction : IsPartyFunctionBase { }
@@ -113,15 +72,31 @@ namespace BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition
     public class IsPartyFunctionBase : FunctionMessage
     {
         [Parameter("address", "", 1)]
-        public string ReturnValue1 { get; set; }
+        public virtual string ReturnValue1 { get; set; }
     }
 
-    public partial class LpFeeFunction : LpFeeFunctionBase { }
+    public partial class JoinPartyFunction : JoinPartyFunctionBase { }
 
-    [Function("lpFee", "uint24")]
-    public class LpFeeFunctionBase : FunctionMessage
+    [Function("joinParty")]
+    public class JoinPartyFunctionBase : FunctionMessage
     {
+        [Parameter("address", "tokenOut", 1)]
+        public virtual string TokenOut { get; set; }
+        [Parameter("uint256", "amountOutMinimum", 2)]
+        public virtual BigInteger AmountOutMinimum { get; set; }
+    }
 
+    public partial class LeavePartyFunction : LeavePartyFunctionBase { }
+
+    [Function("leaveParty")]
+    public class LeavePartyFunctionBase : FunctionMessage
+    {
+        [Parameter("address", "tokenIn", 1)]
+        public virtual string TokenIn { get; set; }
+        [Parameter("uint256", "amountIn", 2)]
+        public virtual BigInteger AmountIn { get; set; }
+        [Parameter("uint256", "amountOutMinimum", 3)]
+        public virtual BigInteger AmountOutMinimum { get; set; }
     }
 
     public partial class LpToTokenIdFunction : LpToTokenIdFunctionBase { }
@@ -130,7 +105,7 @@ namespace BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition
     public class LpToTokenIdFunctionBase : FunctionMessage
     {
         [Parameter("address", "", 1)]
-        public string ReturnValue1 { get; set; }
+        public virtual string ReturnValue1 { get; set; }
     }
 
     public partial class OwnerFunction : OwnerFunctionBase { }
@@ -141,18 +116,10 @@ namespace BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition
 
     }
 
-    public partial class PartyLPFeeFunction : PartyLPFeeFunctionBase { }
+    public partial class PartyFunction : PartyFunctionBase { }
 
-    [Function("partyLPFee", "uint24")]
-    public class PartyLPFeeFunctionBase : FunctionMessage
-    {
-
-    }
-
-    public partial class PartyTargetFunction : PartyTargetFunctionBase { }
-
-    [Function("partyTarget", "uint256")]
-    public class PartyTargetFunctionBase : FunctionMessage
+    [Function("party", typeof(PartyOutputDTO))]
+    public class PartyFunctionBase : FunctionMessage
     {
 
     }
@@ -173,45 +140,30 @@ namespace BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition
 
     }
 
-    public partial class ReturnAmountFunction : ReturnAmountFunctionBase { }
-
-    [Function("returnAmount", "uint256")]
-    public class ReturnAmountFunctionBase : FunctionMessage
-    {
-
-    }
-
     public partial class SetNonfungiblePositionManagerFunction : SetNonfungiblePositionManagerFunctionBase { }
 
     [Function("setNonfungiblePositionManager")]
     public class SetNonfungiblePositionManagerFunctionBase : FunctionMessage
     {
         [Parameter("address", "_BNBPositionManager", 1)]
-        public string BNBPositionManager { get; set; }
+        public virtual string BNBPositionManager { get; set; }
         [Parameter("address", "_positionManager", 2)]
-        public string PositionManager { get; set; }
+        public virtual string PositionManager { get; set; }
     }
 
-    public partial class SqrtPriceX96Function : SqrtPriceX96FunctionBase { }
+    public partial class SetSwapRouterFunction : SetSwapRouterFunctionBase { }
 
-    [Function("sqrtPriceX96", "uint160")]
-    public class SqrtPriceX96FunctionBase : FunctionMessage
+    [Function("setSwapRouter")]
+    public class SetSwapRouterFunctionBase : FunctionMessage
     {
-
+        [Parameter("address", "_swapRouter", 1)]
+        public virtual string SwapRouter { get; set; }
     }
 
-    public partial class TickLowerFunction : TickLowerFunctionBase { }
+    public partial class SwapRouterFunction : SwapRouterFunctionBase { }
 
-    [Function("tickLower", "int24")]
-    public class TickLowerFunctionBase : FunctionMessage
-    {
-
-    }
-
-    public partial class TickUpperFunction : TickUpperFunctionBase { }
-
-    [Function("tickUpper", "int24")]
-    public class TickUpperFunctionBase : FunctionMessage
+    [Function("swapRouter", "address")]
+    public class SwapRouterFunctionBase : FunctionMessage
     {
 
     }
@@ -222,7 +174,7 @@ namespace BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition
     public class TransferOwnershipFunctionBase : FunctionMessage
     {
         [Parameter("address", "newOwner", 1)]
-        public string NewOwner { get; set; }
+        public virtual string NewOwner { get; set; }
     }
 
     public partial class OwnershipTransferredEventDTO : OwnershipTransferredEventDTOBase { }
@@ -231,9 +183,9 @@ namespace BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition
     public class OwnershipTransferredEventDTOBase : IEventDTO
     {
         [Parameter("address", "previousOwner", 1, true )]
-        public string PreviousOwner { get; set; }
+        public virtual string PreviousOwner { get; set; }
         [Parameter("address", "newOwner", 2, true )]
-        public string NewOwner { get; set; }
+        public virtual string NewOwner { get; set; }
     }
 
     public partial class StartPartyEventDTO : StartPartyEventDTOBase { }
@@ -242,11 +194,53 @@ namespace BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition
     public class StartPartyEventDTOBase : IEventDTO
     {
         [Parameter("address", "tokenAddress", 1, true )]
-        public string TokenAddress { get; set; }
+        public virtual string TokenAddress { get; set; }
         [Parameter("address", "owner", 2, true )]
-        public string Owner { get; set; }
+        public virtual string Owner { get; set; }
         [Parameter("address", "FLPAddress", 3, true )]
-        public string FLPAddress { get; set; }
+        public virtual string FLPAddress { get; set; }
+    }
+
+    public partial class AddressEmptyCodeError : AddressEmptyCodeErrorBase { }
+
+    [Error("AddressEmptyCode")]
+    public class AddressEmptyCodeErrorBase : IErrorDTO
+    {
+        [Parameter("address", "target", 1)]
+        public virtual string Target { get; set; }
+    }
+
+    public partial class AddressInsufficientBalanceError : AddressInsufficientBalanceErrorBase { }
+
+    [Error("AddressInsufficientBalance")]
+    public class AddressInsufficientBalanceErrorBase : IErrorDTO
+    {
+        [Parameter("address", "account", 1)]
+        public virtual string Account { get; set; }
+    }
+
+    public partial class BonusGreaterThanTargetError : BonusGreaterThanTargetErrorBase { }
+    [Error("BonusGreaterThanTarget")]
+    public class BonusGreaterThanTargetErrorBase : IErrorDTO
+    {
+    }
+
+    public partial class FailedInnerCallError : FailedInnerCallErrorBase { }
+    [Error("FailedInnerCall")]
+    public class FailedInnerCallErrorBase : IErrorDTO
+    {
+    }
+
+    public partial class InsufficientBNBError : InsufficientBNBErrorBase { }
+    [Error("InsufficientBNB")]
+    public class InsufficientBNBErrorBase : IErrorDTO
+    {
+    }
+
+    public partial class LPNotAtPartyError : LPNotAtPartyErrorBase { }
+    [Error("LPNotAtParty")]
+    public class LPNotAtPartyErrorBase : IErrorDTO
+    {
     }
 
     public partial class OwnableInvalidOwnerError : OwnableInvalidOwnerErrorBase { }
@@ -255,7 +249,7 @@ namespace BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition
     public class OwnableInvalidOwnerErrorBase : IErrorDTO
     {
         [Parameter("address", "owner", 1)]
-        public string Owner { get; set; }
+        public virtual string Owner { get; set; }
     }
 
     public partial class OwnableUnauthorizedAccountError : OwnableUnauthorizedAccountErrorBase { }
@@ -264,12 +258,51 @@ namespace BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition
     public class OwnableUnauthorizedAccountErrorBase : IErrorDTO
     {
         [Parameter("address", "account", 1)]
-        public string Account { get; set; }
+        public virtual string Account { get; set; }
+    }
+
+    public partial class PositionManagerAlreadySetError : PositionManagerAlreadySetErrorBase { }
+    [Error("PositionManagerAlreadySet")]
+    public class PositionManagerAlreadySetErrorBase : IErrorDTO
+    {
+    }
+
+    public partial class PositionManagerNotSetError : PositionManagerNotSetErrorBase { }
+    [Error("PositionManagerNotSet")]
+    public class PositionManagerNotSetErrorBase : IErrorDTO
+    {
     }
 
     public partial class ReentrancyGuardReentrantCallError : ReentrancyGuardReentrantCallErrorBase { }
     [Error("ReentrancyGuardReentrantCall")]
     public class ReentrancyGuardReentrantCallErrorBase : IErrorDTO
+    {
+    }
+
+    public partial class SafeERC20FailedOperationError : SafeERC20FailedOperationErrorBase { }
+
+    [Error("SafeERC20FailedOperation")]
+    public class SafeERC20FailedOperationErrorBase : IErrorDTO
+    {
+        [Parameter("address", "token", 1)]
+        public virtual string Token { get; set; }
+    }
+
+    public partial class SwapRouterAlreadySetError : SwapRouterAlreadySetErrorBase { }
+    [Error("SwapRouterAlreadySet")]
+    public class SwapRouterAlreadySetErrorBase : IErrorDTO
+    {
+    }
+
+    public partial class ZeroAddressError : ZeroAddressErrorBase { }
+    [Error("ZeroAddress")]
+    public class ZeroAddressErrorBase : IErrorDTO
+    {
+    }
+
+    public partial class ZeroAmountError : ZeroAmountErrorBase { }
+    [Error("ZeroAmount")]
+    public class ZeroAmountErrorBase : IErrorDTO
     {
     }
 
@@ -279,7 +312,7 @@ namespace BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition
     public class BNBPositionManagerOutputDTOBase : IFunctionOutputDTO 
     {
         [Parameter("address", "", 1)]
-        public string ReturnValue1 { get; set; }
+        public virtual string ReturnValue1 { get; set; }
     }
 
     public partial class WbnbOutputDTO : WbnbOutputDTOBase { }
@@ -288,48 +321,12 @@ namespace BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition
     public class WbnbOutputDTOBase : IFunctionOutputDTO 
     {
         [Parameter("address", "", 1)]
-        public string ReturnValue1 { get; set; }
-    }
-
-    public partial class BonusPartyCreatorOutputDTO : BonusPartyCreatorOutputDTOBase { }
-
-    [FunctionOutput]
-    public class BonusPartyCreatorOutputDTOBase : IFunctionOutputDTO 
-    {
-        [Parameter("uint256", "", 1)]
-        public BigInteger ReturnValue1 { get; set; }
-    }
-
-    public partial class BonusTargetReachOutputDTO : BonusTargetReachOutputDTOBase { }
-
-    [FunctionOutput]
-    public class BonusTargetReachOutputDTOBase : IFunctionOutputDTO 
-    {
-        [Parameter("uint256", "", 1)]
-        public BigInteger ReturnValue1 { get; set; }
+        public virtual string ReturnValue1 { get; set; }
     }
 
 
 
-    public partial class CreateTokenFeeOutputDTO : CreateTokenFeeOutputDTOBase { }
 
-    [FunctionOutput]
-    public class CreateTokenFeeOutputDTOBase : IFunctionOutputDTO 
-    {
-        [Parameter("uint256", "", 1)]
-        public BigInteger ReturnValue1 { get; set; }
-    }
-
-
-
-    public partial class InitialTokenAmountOutputDTO : InitialTokenAmountOutputDTOBase { }
-
-    [FunctionOutput]
-    public class InitialTokenAmountOutputDTOBase : IFunctionOutputDTO 
-    {
-        [Parameter("uint256", "", 1)]
-        public BigInteger ReturnValue1 { get; set; }
-    }
 
     public partial class IsPartyOutputDTO : IsPartyOutputDTOBase { }
 
@@ -337,17 +334,12 @@ namespace BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition
     public class IsPartyOutputDTOBase : IFunctionOutputDTO 
     {
         [Parameter("bool", "", 1)]
-        public bool ReturnValue1 { get; set; }
+        public virtual bool ReturnValue1 { get; set; }
     }
 
-    public partial class LpFeeOutputDTO : LpFeeOutputDTOBase { }
 
-    [FunctionOutput]
-    public class LpFeeOutputDTOBase : IFunctionOutputDTO 
-    {
-        [Parameter("uint24", "", 1)]
-        public uint ReturnValue1 { get; set; }
-    }
+
+
 
     public partial class LpToTokenIdOutputDTO : LpToTokenIdOutputDTOBase { }
 
@@ -355,7 +347,7 @@ namespace BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition
     public class LpToTokenIdOutputDTOBase : IFunctionOutputDTO 
     {
         [Parameter("uint256", "", 1)]
-        public BigInteger ReturnValue1 { get; set; }
+        public virtual BigInteger ReturnValue1 { get; set; }
     }
 
     public partial class OwnerOutputDTO : OwnerOutputDTOBase { }
@@ -364,25 +356,34 @@ namespace BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition
     public class OwnerOutputDTOBase : IFunctionOutputDTO 
     {
         [Parameter("address", "", 1)]
-        public string ReturnValue1 { get; set; }
+        public virtual string ReturnValue1 { get; set; }
     }
 
-    public partial class PartyLPFeeOutputDTO : PartyLPFeeOutputDTOBase { }
+    public partial class PartyOutputDTO : PartyOutputDTOBase { }
 
     [FunctionOutput]
-    public class PartyLPFeeOutputDTOBase : IFunctionOutputDTO 
+    public class PartyOutputDTOBase : IFunctionOutputDTO 
     {
-        [Parameter("uint24", "", 1)]
-        public uint ReturnValue1 { get; set; }
-    }
-
-    public partial class PartyTargetOutputDTO : PartyTargetOutputDTOBase { }
-
-    [FunctionOutput]
-    public class PartyTargetOutputDTOBase : IFunctionOutputDTO 
-    {
-        [Parameter("uint256", "", 1)]
-        public BigInteger ReturnValue1 { get; set; }
+        [Parameter("uint256", "partyTarget", 1)]
+        public virtual BigInteger PartyTarget { get; set; }
+        [Parameter("uint256", "createTokenFee", 2)]
+        public virtual BigInteger CreateTokenFee { get; set; }
+        [Parameter("uint24", "partyLpFee", 3)]
+        public virtual uint PartyLpFee { get; set; }
+        [Parameter("uint24", "lpFee", 4)]
+        public virtual uint LpFee { get; set; }
+        [Parameter("uint256", "initialTokenAmount", 5)]
+        public virtual BigInteger InitialTokenAmount { get; set; }
+        [Parameter("uint160", "sqrtPriceX96", 6)]
+        public virtual BigInteger SqrtPriceX96 { get; set; }
+        [Parameter("uint256", "bonusTargetReach", 7)]
+        public virtual BigInteger BonusTargetReach { get; set; }
+        [Parameter("uint256", "bonusPartyCreator", 8)]
+        public virtual BigInteger BonusPartyCreator { get; set; }
+        [Parameter("int24", "tickLower", 9)]
+        public virtual int TickLower { get; set; }
+        [Parameter("int24", "tickUpper", 10)]
+        public virtual int TickUpper { get; set; }
     }
 
     public partial class PositionManagerOutputDTO : PositionManagerOutputDTOBase { }
@@ -391,47 +392,16 @@ namespace BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition
     public class PositionManagerOutputDTOBase : IFunctionOutputDTO 
     {
         [Parameter("address", "", 1)]
-        public string ReturnValue1 { get; set; }
+        public virtual string ReturnValue1 { get; set; }
     }
 
-
-
-    public partial class ReturnAmountOutputDTO : ReturnAmountOutputDTOBase { }
+    public partial class SwapRouterOutputDTO : SwapRouterOutputDTOBase { }
 
     [FunctionOutput]
-    public class ReturnAmountOutputDTOBase : IFunctionOutputDTO 
+    public class SwapRouterOutputDTOBase : IFunctionOutputDTO 
     {
-        [Parameter("uint256", "", 1)]
-        public BigInteger ReturnValue1 { get; set; }
-    }
-
-
-
-    public partial class SqrtPriceX96OutputDTO : SqrtPriceX96OutputDTOBase { }
-
-    [FunctionOutput]
-    public class SqrtPriceX96OutputDTOBase : IFunctionOutputDTO 
-    {
-        [Parameter("uint160", "", 1)]
-        public BigInteger ReturnValue1 { get; set; }
-    }
-
-    public partial class TickLowerOutputDTO : TickLowerOutputDTOBase { }
-
-    [FunctionOutput]
-    public class TickLowerOutputDTOBase : IFunctionOutputDTO 
-    {
-        [Parameter("int24", "", 1)]
-        public int ReturnValue1 { get; set; }
-    }
-
-    public partial class TickUpperOutputDTO : TickUpperOutputDTOBase { }
-
-    [FunctionOutput]
-    public class TickUpperOutputDTOBase : IFunctionOutputDTO 
-    {
-        [Parameter("int24", "", 1)]
-        public int ReturnValue1 { get; set; }
+        [Parameter("address", "", 1)]
+        public virtual string ReturnValue1 { get; set; }
     }
 
 

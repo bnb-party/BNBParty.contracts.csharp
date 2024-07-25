@@ -29,7 +29,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="LICENSE.txt" Pack="true" PackagePath=""/>
+    <Compile Remove="BNBPartyFactory\Generated\**" />
+    <EmbeddedResource Remove="BNBPartyFactory\Generated\**" />
+    <None Remove="BNBPartyFactory\Generated\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="LICENSE.txt" Pack="true" PackagePath="" />
     <None Include="README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>

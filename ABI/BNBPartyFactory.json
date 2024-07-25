@@ -2,63 +2,112 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "_partyTarget",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_createTokenFee",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint24",
-        "name": "_partyLpFee",
-        "type": "uint24"
-      },
-      {
-        "internalType": "uint24",
-        "name": "_lpFee",
-        "type": "uint24"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_initialTokenAmount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint160",
-        "name": "_sqrtPriceX96",
-        "type": "uint160"
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "partyTarget",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "createTokenFee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint24",
+            "name": "partyLpFee",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "lpFee",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint256",
+            "name": "initialTokenAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint160",
+            "name": "sqrtPriceX96",
+            "type": "uint160"
+          },
+          {
+            "internalType": "uint256",
+            "name": "bonusTargetReach",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "bonusPartyCreator",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int24",
+            "name": "tickLower",
+            "type": "int24"
+          },
+          {
+            "internalType": "int24",
+            "name": "tickUpper",
+            "type": "int24"
+          }
+        ],
+        "internalType": "struct IBNBPartyFactory.Party",
+        "name": "_party",
+        "type": "tuple"
       },
       {
         "internalType": "contract IWBNB",
         "name": "_WBNB",
         "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_bonusTargetReach",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_bonusPartyCreator",
-        "type": "uint256"
-      },
-      {
-        "internalType": "int24",
-        "name": "_tickLower",
-        "type": "int24"
-      },
-      {
-        "internalType": "int24",
-        "name": "_tickUpper",
-        "type": "int24"
       }
     ],
     "stateMutability": "nonpayable",
     "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "target",
+        "type": "address"
+      }
+    ],
+    "name": "AddressEmptyCode",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "AddressInsufficientBalance",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "BonusGreaterThanTarget",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "FailedInnerCall",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InsufficientBNB",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "LPNotAtParty",
+    "type": "error"
   },
   {
     "inputs": [
@@ -84,7 +133,43 @@
   },
   {
     "inputs": [],
+    "name": "PositionManagerAlreadySet",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "PositionManagerNotSet",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "ReentrancyGuardReentrantCall",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "SwapRouterAlreadySet",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroAmount",
     "type": "error"
   },
   {
@@ -158,32 +243,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "bonusPartyCreator",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "bonusTargetReach",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "string",
@@ -208,19 +267,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "createTokenFee",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "address",
@@ -231,19 +277,6 @@
     "name": "handleSwap",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "initialTokenAmount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -266,16 +299,44 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "lpFee",
-    "outputs": [
+    "inputs": [
       {
-        "internalType": "uint24",
-        "name": "",
-        "type": "uint24"
+        "internalType": "address",
+        "name": "tokenOut",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountOutMinimum",
+        "type": "uint256"
       }
     ],
-    "stateMutability": "view",
+    "name": "joinParty",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "tokenIn",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountOutMinimum",
+        "type": "uint256"
+      }
+    ],
+    "name": "leaveParty",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -312,25 +373,57 @@
   },
   {
     "inputs": [],
-    "name": "partyLPFee",
-    "outputs": [
-      {
-        "internalType": "uint24",
-        "name": "",
-        "type": "uint24"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "partyTarget",
+    "name": "party",
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "partyTarget",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "createTokenFee",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint24",
+        "name": "partyLpFee",
+        "type": "uint24"
+      },
+      {
+        "internalType": "uint24",
+        "name": "lpFee",
+        "type": "uint24"
+      },
+      {
+        "internalType": "uint256",
+        "name": "initialTokenAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint160",
+        "name": "sqrtPriceX96",
+        "type": "uint160"
+      },
+      {
+        "internalType": "uint256",
+        "name": "bonusTargetReach",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "bonusPartyCreator",
+        "type": "uint256"
+      },
+      {
+        "internalType": "int24",
+        "name": "tickLower",
+        "type": "int24"
+      },
+      {
+        "internalType": "int24",
+        "name": "tickUpper",
+        "type": "int24"
       }
     ],
     "stateMutability": "view",
@@ -357,19 +450,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "returnAmount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "contract INonfungiblePositionManager",
@@ -388,39 +468,26 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "sqrtPriceX96",
-    "outputs": [
+    "inputs": [
       {
-        "internalType": "uint160",
-        "name": "",
-        "type": "uint160"
+        "internalType": "contract ISwapRouter",
+        "name": "_swapRouter",
+        "type": "address"
       }
     ],
-    "stateMutability": "view",
+    "name": "setSwapRouter",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [],
-    "name": "tickLower",
+    "name": "swapRouter",
     "outputs": [
       {
-        "internalType": "int24",
+        "internalType": "contract ISwapRouter",
         "name": "",
-        "type": "int24"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "tickUpper",
-    "outputs": [
-      {
-        "internalType": "int24",
-        "name": "",
-        "type": "int24"
+        "type": "address"
       }
     ],
     "stateMutability": "view",
