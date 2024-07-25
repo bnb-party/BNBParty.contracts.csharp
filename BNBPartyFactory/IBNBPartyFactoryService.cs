@@ -3,120 +3,73 @@ using System.Threading;
 using System.Threading.Tasks;
 using BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition;
 using Nethereum.RPC.Eth.DTOs;
-using Nethereum.Web3;
 
 namespace BNBParty.contracts.csharp.BNBPartyFactory
 {
     public interface IBNBPartyFactoryService
     {
-        public Task<string> BNBPositionManagerQueryAsync(BNBPositionManagerFunction bNBPositionManagerFunction, BlockParameter blockParameter = null);
+        Task<string> BNBPositionManagerQueryAsync(BNBPositionManagerFunction bNBPositionManagerFunction, BlockParameter blockParameter = null);
+        Task<string> BNBPositionManagerQueryAsync(BlockParameter blockParameter = null);
 
-        public Task<string> BNBPositionManagerQueryAsync(BlockParameter blockParameter = null);
+        Task<string> WbnbQueryAsync(WbnbFunction wbnbFunction, BlockParameter blockParameter = null);
+        Task<string> WbnbQueryAsync(BlockParameter blockParameter = null);
 
-        public Task<string> WbnbQueryAsync(WbnbFunction wbnbFunction, BlockParameter blockParameter = null);
+        Task<string> CreatePartyRequestAsync(CreatePartyFunction createPartyFunction);
+        Task<TransactionReceipt> CreatePartyRequestAndWaitForReceiptAsync(CreatePartyFunction createPartyFunction, CancellationTokenSource cancellationToken = null);
+        Task<string> CreatePartyRequestAsync(string name, string symbol);
+        Task<TransactionReceipt> CreatePartyRequestAndWaitForReceiptAsync(string name, string symbol, CancellationTokenSource cancellationToken = null);
 
-        public Task<string> WbnbQueryAsync(BlockParameter blockParameter = null);
+        Task<string> HandleSwapRequestAsync(HandleSwapFunction handleSwapFunction);
+        Task<TransactionReceipt> HandleSwapRequestAndWaitForReceiptAsync(HandleSwapFunction handleSwapFunction, CancellationTokenSource cancellationToken = null);
+        Task<string> HandleSwapRequestAsync(string recipient);
+        Task<TransactionReceipt> HandleSwapRequestAndWaitForReceiptAsync(string recipient, CancellationTokenSource cancellationToken = null);
 
-        public Task<BigInteger> BonusPartyCreatorQueryAsync(BonusPartyCreatorFunction bonusPartyCreatorFunction, BlockParameter blockParameter = null);
+        Task<bool> IsPartyQueryAsync(IsPartyFunction isPartyFunction, BlockParameter blockParameter = null);
+        Task<bool> IsPartyQueryAsync(string returnValue1, BlockParameter blockParameter = null);
 
-        public Task<BigInteger> BonusPartyCreatorQueryAsync(BlockParameter blockParameter = null);
+        Task<string> JoinPartyRequestAsync(JoinPartyFunction joinPartyFunction);
+        Task<TransactionReceipt> JoinPartyRequestAndWaitForReceiptAsync(JoinPartyFunction joinPartyFunction, CancellationTokenSource cancellationToken = null);
+        Task<string> JoinPartyRequestAsync(string tokenOut, BigInteger amountOutMinimum);
+        Task<TransactionReceipt> JoinPartyRequestAndWaitForReceiptAsync(string tokenOut, BigInteger amountOutMinimum, CancellationTokenSource cancellationToken = null);
 
-        public Task<BigInteger> BonusTargetReachQueryAsync(BonusTargetReachFunction bonusTargetReachFunction, BlockParameter blockParameter = null);
+        Task<string> LeavePartyRequestAsync(LeavePartyFunction leavePartyFunction);
+        Task<TransactionReceipt> LeavePartyRequestAndWaitForReceiptAsync(LeavePartyFunction leavePartyFunction, CancellationTokenSource cancellationToken = null);
+        Task<string> LeavePartyRequestAsync(string tokenIn, BigInteger amountIn, BigInteger amountOutMinimum);
+        Task<TransactionReceipt> LeavePartyRequestAndWaitForReceiptAsync(string tokenIn, BigInteger amountIn, BigInteger amountOutMinimum, CancellationTokenSource cancellationToken = null);
 
-        public Task<BigInteger> BonusTargetReachQueryAsync(BlockParameter blockParameter = null);
+        Task<BigInteger> LpToTokenIdQueryAsync(LpToTokenIdFunction lpToTokenIdFunction, BlockParameter blockParameter = null);
+        Task<BigInteger> LpToTokenIdQueryAsync(string returnValue1, BlockParameter blockParameter = null);
 
-        public Task<string> CreatePartyRequestAsync(CreatePartyFunction createPartyFunction);
+        Task<string> OwnerQueryAsync(OwnerFunction ownerFunction, BlockParameter blockParameter = null);
+        Task<string> OwnerQueryAsync(BlockParameter blockParameter = null);
 
-        public Task<TransactionReceipt> CreatePartyRequestAndWaitForReceiptAsync(CreatePartyFunction createPartyFunction, CancellationTokenSource cancellationToken = null);
+        Task<PartyOutputDTO> PartyQueryAsync(PartyFunction partyFunction, BlockParameter blockParameter = null);
+        Task<PartyOutputDTO> PartyQueryAsync(BlockParameter blockParameter = null);
 
-        public Task<string> CreatePartyRequestAsync(string name, string symbol);
+        Task<string> PositionManagerQueryAsync(PositionManagerFunction positionManagerFunction, BlockParameter blockParameter = null);
+        Task<string> PositionManagerQueryAsync(BlockParameter blockParameter = null);
 
-        public Task<TransactionReceipt> CreatePartyRequestAndWaitForReceiptAsync(string name, string symbol, CancellationTokenSource cancellationToken = null);
+        Task<string> RenounceOwnershipRequestAsync(RenounceOwnershipFunction renounceOwnershipFunction);
+        Task<string> RenounceOwnershipRequestAsync();
+        Task<TransactionReceipt> RenounceOwnershipRequestAndWaitForReceiptAsync(RenounceOwnershipFunction renounceOwnershipFunction, CancellationTokenSource cancellationToken = null);
+        Task<TransactionReceipt> RenounceOwnershipRequestAndWaitForReceiptAsync(CancellationTokenSource cancellationToken = null);
 
-        public Task<BigInteger> CreateTokenFeeQueryAsync(CreateTokenFeeFunction createTokenFeeFunction, BlockParameter blockParameter = null);
+        Task<string> SetNonfungiblePositionManagerRequestAsync(SetNonfungiblePositionManagerFunction setNonfungiblePositionManagerFunction);
+        Task<TransactionReceipt> SetNonfungiblePositionManagerRequestAndWaitForReceiptAsync(SetNonfungiblePositionManagerFunction setNonfungiblePositionManagerFunction, CancellationTokenSource cancellationToken = null);
+        Task<string> SetNonfungiblePositionManagerRequestAsync(string bNBPositionManager, string positionManager);
+        Task<TransactionReceipt> SetNonfungiblePositionManagerRequestAndWaitForReceiptAsync(string bNBPositionManager, string positionManager, CancellationTokenSource cancellationToken = null);
 
-        public Task<BigInteger> CreateTokenFeeQueryAsync(BlockParameter blockParameter = null);
+        Task<string> SetSwapRouterRequestAsync(SetSwapRouterFunction setSwapRouterFunction);
+        Task<TransactionReceipt> SetSwapRouterRequestAndWaitForReceiptAsync(SetSwapRouterFunction setSwapRouterFunction, CancellationTokenSource cancellationToken = null);
+        Task<string> SetSwapRouterRequestAsync(string swapRouter);
+        Task<TransactionReceipt> SetSwapRouterRequestAndWaitForReceiptAsync(string swapRouter, CancellationTokenSource cancellationToken = null);
 
-        public Task<string> HandleSwapRequestAsync(HandleSwapFunction handleSwapFunction);
+        Task<string> SwapRouterQueryAsync(SwapRouterFunction swapRouterFunction, BlockParameter blockParameter = null);
+        Task<string> SwapRouterQueryAsync(BlockParameter blockParameter = null);
 
-        public Task<TransactionReceipt> HandleSwapRequestAndWaitForReceiptAsync(HandleSwapFunction handleSwapFunction, CancellationTokenSource cancellationToken = null);
-
-        public Task<string> HandleSwapRequestAsync(string recipient);
-
-        public Task<TransactionReceipt> HandleSwapRequestAndWaitForReceiptAsync(string recipient, CancellationTokenSource cancellationToken = null);
-
-        public Task<BigInteger> InitialTokenAmountQueryAsync(InitialTokenAmountFunction initialTokenAmountFunction, BlockParameter blockParameter = null);
-
-        public Task<BigInteger> InitialTokenAmountQueryAsync(BlockParameter blockParameter = null);
-
-        public Task<bool> IsPartyQueryAsync(IsPartyFunction isPartyFunction, BlockParameter blockParameter = null);
-
-        public Task<bool> IsPartyQueryAsync(string returnValue1, BlockParameter blockParameter = null);
-
-        public Task<uint> LpFeeQueryAsync(LpFeeFunction lpFeeFunction, BlockParameter blockParameter = null);
-
-        public Task<uint> LpFeeQueryAsync(BlockParameter blockParameter = null);
-
-        public Task<BigInteger> LpToTokenIdQueryAsync(LpToTokenIdFunction lpToTokenIdFunction, BlockParameter blockParameter = null);
-
-        public Task<BigInteger> LpToTokenIdQueryAsync(string returnValue1, BlockParameter blockParameter = null);
-
-        public Task<string> OwnerQueryAsync(OwnerFunction ownerFunction, BlockParameter blockParameter = null);
-
-        public Task<string> OwnerQueryAsync(BlockParameter blockParameter = null);
-
-        public Task<uint> PartyLPFeeQueryAsync(PartyLPFeeFunction partyLPFeeFunction, BlockParameter blockParameter = null);
-
-        public Task<uint> PartyLPFeeQueryAsync(BlockParameter blockParameter = null);
-
-        public Task<BigInteger> PartyTargetQueryAsync(PartyTargetFunction partyTargetFunction, BlockParameter blockParameter = null);
-
-        public Task<BigInteger> PartyTargetQueryAsync(BlockParameter blockParameter = null);
-
-        public Task<string> PositionManagerQueryAsync(PositionManagerFunction positionManagerFunction, BlockParameter blockParameter = null);
-
-        public Task<string> PositionManagerQueryAsync(BlockParameter blockParameter = null);
-
-        public Task<string> RenounceOwnershipRequestAsync(RenounceOwnershipFunction renounceOwnershipFunction);
-
-        public Task<string> RenounceOwnershipRequestAsync();
-
-        public Task<TransactionReceipt> RenounceOwnershipRequestAndWaitForReceiptAsync(RenounceOwnershipFunction renounceOwnershipFunction, CancellationTokenSource cancellationToken = null);
-
-        public Task<TransactionReceipt> RenounceOwnershipRequestAndWaitForReceiptAsync(CancellationTokenSource cancellationToken = null);
-
-        public Task<BigInteger> ReturnAmountQueryAsync(ReturnAmountFunction returnAmountFunction, BlockParameter blockParameter = null);
-
-        public Task<BigInteger> ReturnAmountQueryAsync(BlockParameter blockParameter = null);
-
-        public Task<string> SetNonfungiblePositionManagerRequestAsync(SetNonfungiblePositionManagerFunction setNonfungiblePositionManagerFunction);
-
-        public Task<TransactionReceipt> SetNonfungiblePositionManagerRequestAndWaitForReceiptAsync(SetNonfungiblePositionManagerFunction setNonfungiblePositionManagerFunction, CancellationTokenSource cancellationToken = null);
-
-        public Task<string> SetNonfungiblePositionManagerRequestAsync(string bNBPositionManager, string positionManager);
-
-        public Task<TransactionReceipt> SetNonfungiblePositionManagerRequestAndWaitForReceiptAsync(string bNBPositionManager, string positionManager, CancellationTokenSource cancellationToken = null);
-
-        public Task<BigInteger> SqrtPriceX96QueryAsync(SqrtPriceX96Function sqrtPriceX96Function, BlockParameter blockParameter = null);
-
-        public Task<BigInteger> SqrtPriceX96QueryAsync(BlockParameter blockParameter = null);
-
-        public Task<int> TickLowerQueryAsync(TickLowerFunction tickLowerFunction, BlockParameter blockParameter = null);
-
-        public Task<int> TickLowerQueryAsync(BlockParameter blockParameter = null);
-
-        public Task<int> TickUpperQueryAsync(TickUpperFunction tickUpperFunction, BlockParameter blockParameter = null);
-
-        public Task<int> TickUpperQueryAsync(BlockParameter blockParameter = null);
-
-        public Task<string> TransferOwnershipRequestAsync(TransferOwnershipFunction transferOwnershipFunction);
-
-        public Task<TransactionReceipt> TransferOwnershipRequestAndWaitForReceiptAsync(TransferOwnershipFunction transferOwnershipFunction, CancellationTokenSource cancellationToken = null);
-
-        public Task<string> TransferOwnershipRequestAsync(string newOwner);
-
-        public Task<TransactionReceipt> TransferOwnershipRequestAndWaitForReceiptAsync(string newOwner, CancellationTokenSource cancellationToken = null);
-
-        public void Initialize(IWeb3 web3, string contractAddress);
+        Task<string> TransferOwnershipRequestAsync(TransferOwnershipFunction transferOwnershipFunction);
+        Task<TransactionReceipt> TransferOwnershipRequestAndWaitForReceiptAsync(TransferOwnershipFunction transferOwnershipFunction, CancellationTokenSource cancellationToken = null);
+        Task<string> TransferOwnershipRequestAsync(string newOwner);
+        Task<TransactionReceipt> TransferOwnershipRequestAndWaitForReceiptAsync(string newOwner, CancellationTokenSource cancellationToken = null);
     }
 }

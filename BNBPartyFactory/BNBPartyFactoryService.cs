@@ -1,402 +1,398 @@
 using System;
-using System.Numerics;
-using System.Threading;
 using System.Threading.Tasks;
-using BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition;
-using Nethereum.Contracts.ContractHandlers;
-using Nethereum.RPC.Eth.DTOs;
+using System.Collections.Generic;
+using System.Numerics;
+using Nethereum.Hex.HexTypes;
+using Nethereum.ABI.FunctionEncoding.Attributes;
 using Nethereum.Web3;
+using Nethereum.RPC.Eth.DTOs;
+using Nethereum.Contracts.CQS;
+using Nethereum.Contracts.ContractHandlers;
+using Nethereum.Contracts;
+using System.Threading;
+using BNBParty.contracts.csharp.BNBPartyFactory.ContractDefinition;
 
 namespace BNBParty.contracts.csharp.BNBPartyFactory
 {
-    public partial class BNBPartyFactoryService : IBNBPartyFactoryService
+    public partial class BNBPartyFactoryService : ContractWeb3ServiceBase, IBNBPartyFactoryService
     {
-        protected virtual IWeb3 Web3 { get; private set; }
-
-        public virtual ContractHandler ContractHandler { get; private set; }
-
-        public BNBPartyFactoryService() { }
-
-        public BNBPartyFactoryService(Web3 web3, string contractAddress)
+        public static Task<TransactionReceipt> DeployContractAndWaitForReceiptAsync(Nethereum.Web3.IWeb3 web3, BNBPartyFactoryDeployment bNBPartyFactoryDeployment, CancellationTokenSource cancellationTokenSource = null)
         {
-            Initialize(web3, contractAddress);
+            return web3.Eth.GetContractDeploymentHandler<BNBPartyFactoryDeployment>().SendRequestAndWaitForReceiptAsync(bNBPartyFactoryDeployment, cancellationTokenSource);
         }
 
-        public BNBPartyFactoryService(IWeb3 web3, string contractAddress)
+        public static Task<string> DeployContractAsync(Nethereum.Web3.IWeb3 web3, BNBPartyFactoryDeployment bNBPartyFactoryDeployment)
         {
-            Initialize(web3, contractAddress);
+            return web3.Eth.GetContractDeploymentHandler<BNBPartyFactoryDeployment>().SendRequestAsync(bNBPartyFactoryDeployment);
         }
 
-        public void Initialize(IWeb3 web3, string contractAddress)
+        public static async Task<BNBPartyFactoryService> DeployContractAndGetServiceAsync(Nethereum.Web3.IWeb3 web3, BNBPartyFactoryDeployment bNBPartyFactoryDeployment, CancellationTokenSource cancellationTokenSource = null)
         {
-            Web3 = web3;
-            ContractHandler = web3.Eth.GetContractHandler(contractAddress);
+            var receipt = await DeployContractAndWaitForReceiptAsync(web3, bNBPartyFactoryDeployment, cancellationTokenSource);
+            return new BNBPartyFactoryService(web3, receipt.ContractAddress);
         }
 
-        private void EnsureInitialized()
+        public BNBPartyFactoryService(Nethereum.Web3.IWeb3 web3, string contractAddress) : base(web3, contractAddress)
         {
-            if (Web3 == null || ContractHandler == null)
-            {
-                throw new InvalidOperationException("The service has not been initialized. Please call the Initialize method with a valid IWeb3 instance and contract address.");
-            }
         }
 
-        public virtual Task<string> BNBPositionManagerQueryAsync(BNBPositionManagerFunction bNBPositionManagerFunction, BlockParameter blockParameter = null)
+        public Task<string> BNBPositionManagerQueryAsync(BNBPositionManagerFunction bNBPositionManagerFunction, BlockParameter blockParameter = null)
         {
-            EnsureInitialized();
             return ContractHandler.QueryAsync<BNBPositionManagerFunction, string>(bNBPositionManagerFunction, blockParameter);
         }
 
-        public virtual Task<string> BNBPositionManagerQueryAsync(BlockParameter blockParameter = null)
+        
+        public Task<string> BNBPositionManagerQueryAsync(BlockParameter blockParameter = null)
         {
-            EnsureInitialized();
             return ContractHandler.QueryAsync<BNBPositionManagerFunction, string>(null, blockParameter);
         }
 
-        public virtual Task<string> WbnbQueryAsync(WbnbFunction wbnbFunction, BlockParameter blockParameter = null)
+        public Task<string> WbnbQueryAsync(WbnbFunction wbnbFunction, BlockParameter blockParameter = null)
         {
-            EnsureInitialized();
             return ContractHandler.QueryAsync<WbnbFunction, string>(wbnbFunction, blockParameter);
         }
 
-        public virtual Task<string> WbnbQueryAsync(BlockParameter blockParameter = null)
+        
+        public Task<string> WbnbQueryAsync(BlockParameter blockParameter = null)
         {
-            EnsureInitialized();
             return ContractHandler.QueryAsync<WbnbFunction, string>(null, blockParameter);
         }
 
-        public virtual Task<BigInteger> BonusPartyCreatorQueryAsync(BonusPartyCreatorFunction bonusPartyCreatorFunction, BlockParameter blockParameter = null)
+        public Task<string> CreatePartyRequestAsync(CreatePartyFunction createPartyFunction)
         {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<BonusPartyCreatorFunction, BigInteger>(bonusPartyCreatorFunction, blockParameter);
+             return ContractHandler.SendRequestAsync(createPartyFunction);
         }
 
-        public virtual Task<BigInteger> BonusPartyCreatorQueryAsync(BlockParameter blockParameter = null)
+        public Task<TransactionReceipt> CreatePartyRequestAndWaitForReceiptAsync(CreatePartyFunction createPartyFunction, CancellationTokenSource cancellationToken = null)
         {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<BonusPartyCreatorFunction, BigInteger>(null, blockParameter);
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(createPartyFunction, cancellationToken);
         }
 
-        public virtual Task<BigInteger> BonusTargetReachQueryAsync(BonusTargetReachFunction bonusTargetReachFunction, BlockParameter blockParameter = null)
+        public Task<string> CreatePartyRequestAsync(string name, string symbol)
         {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<BonusTargetReachFunction, BigInteger>(bonusTargetReachFunction, blockParameter);
-        }
-
-        public virtual Task<BigInteger> BonusTargetReachQueryAsync(BlockParameter blockParameter = null)
-        {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<BonusTargetReachFunction, BigInteger>(null, blockParameter);
-        }
-
-        public virtual Task<string> CreatePartyRequestAsync(CreatePartyFunction createPartyFunction)
-        {
-            EnsureInitialized();
-            return ContractHandler.SendRequestAsync(createPartyFunction);
-        }
-
-        public virtual Task<TransactionReceipt> CreatePartyRequestAndWaitForReceiptAsync(CreatePartyFunction createPartyFunction, CancellationTokenSource cancellationToken = null)
-        {
-            EnsureInitialized();
-            return ContractHandler.SendRequestAndWaitForReceiptAsync(createPartyFunction, cancellationToken);
-        }
-
-        public virtual Task<string> CreatePartyRequestAsync(string name, string symbol)
-        {
-            EnsureInitialized();
             var createPartyFunction = new CreatePartyFunction();
                 createPartyFunction.Name = name;
                 createPartyFunction.Symbol = symbol;
             
-            return ContractHandler.SendRequestAsync(createPartyFunction);
+             return ContractHandler.SendRequestAsync(createPartyFunction);
         }
 
-        public virtual Task<TransactionReceipt> CreatePartyRequestAndWaitForReceiptAsync(string name, string symbol, CancellationTokenSource cancellationToken = null)
+        public Task<TransactionReceipt> CreatePartyRequestAndWaitForReceiptAsync(string name, string symbol, CancellationTokenSource cancellationToken = null)
         {
-            EnsureInitialized();
             var createPartyFunction = new CreatePartyFunction();
                 createPartyFunction.Name = name;
                 createPartyFunction.Symbol = symbol;
             
-            return ContractHandler.SendRequestAndWaitForReceiptAsync(createPartyFunction, cancellationToken);
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(createPartyFunction, cancellationToken);
         }
 
-        public virtual Task<BigInteger> CreateTokenFeeQueryAsync(CreateTokenFeeFunction createTokenFeeFunction, BlockParameter blockParameter = null)
+        public Task<string> HandleSwapRequestAsync(HandleSwapFunction handleSwapFunction)
         {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<CreateTokenFeeFunction, BigInteger>(createTokenFeeFunction, blockParameter);
+             return ContractHandler.SendRequestAsync(handleSwapFunction);
         }
 
-        public virtual Task<BigInteger> CreateTokenFeeQueryAsync(BlockParameter blockParameter = null)
+        public Task<TransactionReceipt> HandleSwapRequestAndWaitForReceiptAsync(HandleSwapFunction handleSwapFunction, CancellationTokenSource cancellationToken = null)
         {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<CreateTokenFeeFunction, BigInteger>(null, blockParameter);
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(handleSwapFunction, cancellationToken);
         }
 
-        public virtual Task<string> HandleSwapRequestAsync(HandleSwapFunction handleSwapFunction)
+        public Task<string> HandleSwapRequestAsync(string recipient)
         {
-            EnsureInitialized();
-            return ContractHandler.SendRequestAsync(handleSwapFunction);
-        }
-
-        public virtual Task<TransactionReceipt> HandleSwapRequestAndWaitForReceiptAsync(HandleSwapFunction handleSwapFunction, CancellationTokenSource cancellationToken = null)
-        {
-            EnsureInitialized();
-            return ContractHandler.SendRequestAndWaitForReceiptAsync(handleSwapFunction, cancellationToken);
-        }
-
-        public virtual Task<string> HandleSwapRequestAsync(string recipient)
-        {
-            EnsureInitialized();
             var handleSwapFunction = new HandleSwapFunction();
                 handleSwapFunction.Recipient = recipient;
             
-            return ContractHandler.SendRequestAsync(handleSwapFunction);
+             return ContractHandler.SendRequestAsync(handleSwapFunction);
         }
 
-        public virtual Task<TransactionReceipt> HandleSwapRequestAndWaitForReceiptAsync(string recipient, CancellationTokenSource cancellationToken = null)
+        public Task<TransactionReceipt> HandleSwapRequestAndWaitForReceiptAsync(string recipient, CancellationTokenSource cancellationToken = null)
         {
-            EnsureInitialized();
             var handleSwapFunction = new HandleSwapFunction();
                 handleSwapFunction.Recipient = recipient;
             
-            return ContractHandler.SendRequestAndWaitForReceiptAsync(handleSwapFunction, cancellationToken);
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(handleSwapFunction, cancellationToken);
         }
 
-        public virtual Task<BigInteger> InitialTokenAmountQueryAsync(InitialTokenAmountFunction initialTokenAmountFunction, BlockParameter blockParameter = null)
+        public Task<bool> IsPartyQueryAsync(IsPartyFunction isPartyFunction, BlockParameter blockParameter = null)
         {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<InitialTokenAmountFunction, BigInteger>(initialTokenAmountFunction, blockParameter);
-        }
-
-        public virtual Task<BigInteger> InitialTokenAmountQueryAsync(BlockParameter blockParameter = null)
-        {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<InitialTokenAmountFunction, BigInteger>(null, blockParameter);
-        }
-
-        public virtual Task<bool> IsPartyQueryAsync(IsPartyFunction isPartyFunction, BlockParameter blockParameter = null)
-        {
-            EnsureInitialized();
             return ContractHandler.QueryAsync<IsPartyFunction, bool>(isPartyFunction, blockParameter);
         }
 
-        public virtual Task<bool> IsPartyQueryAsync(string returnValue1, BlockParameter blockParameter = null)
+        
+        public Task<bool> IsPartyQueryAsync(string returnValue1, BlockParameter blockParameter = null)
         {
-            EnsureInitialized();
             var isPartyFunction = new IsPartyFunction();
                 isPartyFunction.ReturnValue1 = returnValue1;
             
             return ContractHandler.QueryAsync<IsPartyFunction, bool>(isPartyFunction, blockParameter);
         }
 
-        public virtual Task<uint> LpFeeQueryAsync(LpFeeFunction lpFeeFunction, BlockParameter blockParameter = null)
+        public Task<string> JoinPartyRequestAsync(JoinPartyFunction joinPartyFunction)
         {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<LpFeeFunction, uint>(lpFeeFunction, blockParameter);
+             return ContractHandler.SendRequestAsync(joinPartyFunction);
         }
 
-        public virtual Task<uint> LpFeeQueryAsync(BlockParameter blockParameter = null)
+        public Task<TransactionReceipt> JoinPartyRequestAndWaitForReceiptAsync(JoinPartyFunction joinPartyFunction, CancellationTokenSource cancellationToken = null)
         {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<LpFeeFunction, uint>(null, blockParameter);
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(joinPartyFunction, cancellationToken);
         }
 
-        public virtual Task<BigInteger> LpToTokenIdQueryAsync(LpToTokenIdFunction lpToTokenIdFunction, BlockParameter blockParameter = null)
+        public Task<string> JoinPartyRequestAsync(string tokenOut, BigInteger amountOutMinimum)
         {
-            EnsureInitialized();
+            var joinPartyFunction = new JoinPartyFunction();
+                joinPartyFunction.TokenOut = tokenOut;
+                joinPartyFunction.AmountOutMinimum = amountOutMinimum;
+            
+             return ContractHandler.SendRequestAsync(joinPartyFunction);
+        }
+
+        public Task<TransactionReceipt> JoinPartyRequestAndWaitForReceiptAsync(string tokenOut, BigInteger amountOutMinimum, CancellationTokenSource cancellationToken = null)
+        {
+            var joinPartyFunction = new JoinPartyFunction();
+                joinPartyFunction.TokenOut = tokenOut;
+                joinPartyFunction.AmountOutMinimum = amountOutMinimum;
+            
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(joinPartyFunction, cancellationToken);
+        }
+
+        public Task<string> LeavePartyRequestAsync(LeavePartyFunction leavePartyFunction)
+        {
+             return ContractHandler.SendRequestAsync(leavePartyFunction);
+        }
+
+        public Task<TransactionReceipt> LeavePartyRequestAndWaitForReceiptAsync(LeavePartyFunction leavePartyFunction, CancellationTokenSource cancellationToken = null)
+        {
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(leavePartyFunction, cancellationToken);
+        }
+
+        public Task<string> LeavePartyRequestAsync(string tokenIn, BigInteger amountIn, BigInteger amountOutMinimum)
+        {
+            var leavePartyFunction = new LeavePartyFunction();
+                leavePartyFunction.TokenIn = tokenIn;
+                leavePartyFunction.AmountIn = amountIn;
+                leavePartyFunction.AmountOutMinimum = amountOutMinimum;
+            
+             return ContractHandler.SendRequestAsync(leavePartyFunction);
+        }
+
+        public Task<TransactionReceipt> LeavePartyRequestAndWaitForReceiptAsync(string tokenIn, BigInteger amountIn, BigInteger amountOutMinimum, CancellationTokenSource cancellationToken = null)
+        {
+            var leavePartyFunction = new LeavePartyFunction();
+                leavePartyFunction.TokenIn = tokenIn;
+                leavePartyFunction.AmountIn = amountIn;
+                leavePartyFunction.AmountOutMinimum = amountOutMinimum;
+            
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(leavePartyFunction, cancellationToken);
+        }
+
+        public Task<BigInteger> LpToTokenIdQueryAsync(LpToTokenIdFunction lpToTokenIdFunction, BlockParameter blockParameter = null)
+        {
             return ContractHandler.QueryAsync<LpToTokenIdFunction, BigInteger>(lpToTokenIdFunction, blockParameter);
         }
 
-        public virtual Task<BigInteger> LpToTokenIdQueryAsync(string returnValue1, BlockParameter blockParameter = null)
+        
+        public Task<BigInteger> LpToTokenIdQueryAsync(string returnValue1, BlockParameter blockParameter = null)
         {
-            EnsureInitialized();
             var lpToTokenIdFunction = new LpToTokenIdFunction();
                 lpToTokenIdFunction.ReturnValue1 = returnValue1;
             
             return ContractHandler.QueryAsync<LpToTokenIdFunction, BigInteger>(lpToTokenIdFunction, blockParameter);
         }
 
-        public virtual Task<string> OwnerQueryAsync(OwnerFunction ownerFunction, BlockParameter blockParameter = null)
+        public Task<string> OwnerQueryAsync(OwnerFunction ownerFunction, BlockParameter blockParameter = null)
         {
-            EnsureInitialized();
             return ContractHandler.QueryAsync<OwnerFunction, string>(ownerFunction, blockParameter);
         }
 
-        public virtual Task<string> OwnerQueryAsync(BlockParameter blockParameter = null)
+        
+        public Task<string> OwnerQueryAsync(BlockParameter blockParameter = null)
         {
-            EnsureInitialized();
             return ContractHandler.QueryAsync<OwnerFunction, string>(null, blockParameter);
         }
 
-        public virtual Task<uint> PartyLPFeeQueryAsync(PartyLPFeeFunction partyLPFeeFunction, BlockParameter blockParameter = null)
+        public Task<PartyOutputDTO> PartyQueryAsync(PartyFunction partyFunction, BlockParameter blockParameter = null)
         {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<PartyLPFeeFunction, uint>(partyLPFeeFunction, blockParameter);
+            return ContractHandler.QueryDeserializingToObjectAsync<PartyFunction, PartyOutputDTO>(partyFunction, blockParameter);
         }
 
-        public virtual Task<uint> PartyLPFeeQueryAsync(BlockParameter blockParameter = null)
+        public Task<PartyOutputDTO> PartyQueryAsync(BlockParameter blockParameter = null)
         {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<PartyLPFeeFunction, uint>(null, blockParameter);
+            return ContractHandler.QueryDeserializingToObjectAsync<PartyFunction, PartyOutputDTO>(null, blockParameter);
         }
 
-        public virtual Task<BigInteger> PartyTargetQueryAsync(PartyTargetFunction partyTargetFunction, BlockParameter blockParameter = null)
+        public Task<string> PositionManagerQueryAsync(PositionManagerFunction positionManagerFunction, BlockParameter blockParameter = null)
         {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<PartyTargetFunction, BigInteger>(partyTargetFunction, blockParameter);
-        }
-
-        public virtual Task<BigInteger> PartyTargetQueryAsync(BlockParameter blockParameter = null)
-        {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<PartyTargetFunction, BigInteger>(null, blockParameter);
-        }
-
-        public virtual Task<string> PositionManagerQueryAsync(PositionManagerFunction positionManagerFunction, BlockParameter blockParameter = null)
-        {
-            EnsureInitialized();
             return ContractHandler.QueryAsync<PositionManagerFunction, string>(positionManagerFunction, blockParameter);
         }
 
-        public virtual Task<string> PositionManagerQueryAsync(BlockParameter blockParameter = null)
+        
+        public Task<string> PositionManagerQueryAsync(BlockParameter blockParameter = null)
         {
-            EnsureInitialized();
             return ContractHandler.QueryAsync<PositionManagerFunction, string>(null, blockParameter);
         }
 
-        public virtual Task<string> RenounceOwnershipRequestAsync(RenounceOwnershipFunction renounceOwnershipFunction)
+        public Task<string> RenounceOwnershipRequestAsync(RenounceOwnershipFunction renounceOwnershipFunction)
         {
-            EnsureInitialized();
-            return ContractHandler.SendRequestAsync(renounceOwnershipFunction);
+             return ContractHandler.SendRequestAsync(renounceOwnershipFunction);
         }
 
-        public virtual Task<string> RenounceOwnershipRequestAsync()
+        public Task<string> RenounceOwnershipRequestAsync()
         {
-            EnsureInitialized();
-            return ContractHandler.SendRequestAsync<RenounceOwnershipFunction>();
+             return ContractHandler.SendRequestAsync<RenounceOwnershipFunction>();
         }
 
-        public virtual Task<TransactionReceipt> RenounceOwnershipRequestAndWaitForReceiptAsync(RenounceOwnershipFunction renounceOwnershipFunction, CancellationTokenSource cancellationToken = null)
+        public Task<TransactionReceipt> RenounceOwnershipRequestAndWaitForReceiptAsync(RenounceOwnershipFunction renounceOwnershipFunction, CancellationTokenSource cancellationToken = null)
         {
-            EnsureInitialized();
-            return ContractHandler.SendRequestAndWaitForReceiptAsync(renounceOwnershipFunction, cancellationToken);
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(renounceOwnershipFunction, cancellationToken);
         }
 
-        public virtual Task<TransactionReceipt> RenounceOwnershipRequestAndWaitForReceiptAsync(CancellationTokenSource cancellationToken = null)
+        public Task<TransactionReceipt> RenounceOwnershipRequestAndWaitForReceiptAsync(CancellationTokenSource cancellationToken = null)
         {
-            EnsureInitialized();
-            return ContractHandler.SendRequestAndWaitForReceiptAsync<RenounceOwnershipFunction>(null, cancellationToken);
+             return ContractHandler.SendRequestAndWaitForReceiptAsync<RenounceOwnershipFunction>(null, cancellationToken);
         }
 
-        public virtual Task<BigInteger> ReturnAmountQueryAsync(ReturnAmountFunction returnAmountFunction, BlockParameter blockParameter = null)
+        public Task<string> SetNonfungiblePositionManagerRequestAsync(SetNonfungiblePositionManagerFunction setNonfungiblePositionManagerFunction)
         {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<ReturnAmountFunction, BigInteger>(returnAmountFunction, blockParameter);
+             return ContractHandler.SendRequestAsync(setNonfungiblePositionManagerFunction);
         }
 
-        public virtual Task<BigInteger> ReturnAmountQueryAsync(BlockParameter blockParameter = null)
+        public Task<TransactionReceipt> SetNonfungiblePositionManagerRequestAndWaitForReceiptAsync(SetNonfungiblePositionManagerFunction setNonfungiblePositionManagerFunction, CancellationTokenSource cancellationToken = null)
         {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<ReturnAmountFunction, BigInteger>(null, blockParameter);
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(setNonfungiblePositionManagerFunction, cancellationToken);
         }
 
-        public virtual Task<string> SetNonfungiblePositionManagerRequestAsync(SetNonfungiblePositionManagerFunction setNonfungiblePositionManagerFunction)
+        public Task<string> SetNonfungiblePositionManagerRequestAsync(string bNBPositionManager, string positionManager)
         {
-            EnsureInitialized();
-            return ContractHandler.SendRequestAsync(setNonfungiblePositionManagerFunction);
-        }
-
-        public virtual Task<TransactionReceipt> SetNonfungiblePositionManagerRequestAndWaitForReceiptAsync(SetNonfungiblePositionManagerFunction setNonfungiblePositionManagerFunction, CancellationTokenSource cancellationToken = null)
-        {
-            EnsureInitialized();
-            return ContractHandler.SendRequestAndWaitForReceiptAsync(setNonfungiblePositionManagerFunction, cancellationToken);
-        }
-
-        public virtual Task<string> SetNonfungiblePositionManagerRequestAsync(string bNBPositionManager, string positionManager)
-        {
-            EnsureInitialized();
             var setNonfungiblePositionManagerFunction = new SetNonfungiblePositionManagerFunction();
                 setNonfungiblePositionManagerFunction.BNBPositionManager = bNBPositionManager;
                 setNonfungiblePositionManagerFunction.PositionManager = positionManager;
             
-            return ContractHandler.SendRequestAsync(setNonfungiblePositionManagerFunction);
+             return ContractHandler.SendRequestAsync(setNonfungiblePositionManagerFunction);
         }
 
-        public virtual Task<TransactionReceipt> SetNonfungiblePositionManagerRequestAndWaitForReceiptAsync(string bNBPositionManager, string positionManager, CancellationTokenSource cancellationToken = null)
+        public Task<TransactionReceipt> SetNonfungiblePositionManagerRequestAndWaitForReceiptAsync(string bNBPositionManager, string positionManager, CancellationTokenSource cancellationToken = null)
         {
-            EnsureInitialized();
             var setNonfungiblePositionManagerFunction = new SetNonfungiblePositionManagerFunction();
                 setNonfungiblePositionManagerFunction.BNBPositionManager = bNBPositionManager;
                 setNonfungiblePositionManagerFunction.PositionManager = positionManager;
             
-            return ContractHandler.SendRequestAndWaitForReceiptAsync(setNonfungiblePositionManagerFunction, cancellationToken);
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(setNonfungiblePositionManagerFunction, cancellationToken);
         }
 
-        public virtual Task<BigInteger> SqrtPriceX96QueryAsync(SqrtPriceX96Function sqrtPriceX96Function, BlockParameter blockParameter = null)
+        public Task<string> SetSwapRouterRequestAsync(SetSwapRouterFunction setSwapRouterFunction)
         {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<SqrtPriceX96Function, BigInteger>(sqrtPriceX96Function, blockParameter);
+             return ContractHandler.SendRequestAsync(setSwapRouterFunction);
         }
 
-        public virtual Task<BigInteger> SqrtPriceX96QueryAsync(BlockParameter blockParameter = null)
+        public Task<TransactionReceipt> SetSwapRouterRequestAndWaitForReceiptAsync(SetSwapRouterFunction setSwapRouterFunction, CancellationTokenSource cancellationToken = null)
         {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<SqrtPriceX96Function, BigInteger>(null, blockParameter);
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(setSwapRouterFunction, cancellationToken);
         }
 
-        public virtual Task<int> TickLowerQueryAsync(TickLowerFunction tickLowerFunction, BlockParameter blockParameter = null)
+        public Task<string> SetSwapRouterRequestAsync(string swapRouter)
         {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<TickLowerFunction, int>(tickLowerFunction, blockParameter);
+            var setSwapRouterFunction = new SetSwapRouterFunction();
+                setSwapRouterFunction.SwapRouter = swapRouter;
+            
+             return ContractHandler.SendRequestAsync(setSwapRouterFunction);
         }
 
-        public virtual Task<int> TickLowerQueryAsync(BlockParameter blockParameter = null)
+        public Task<TransactionReceipt> SetSwapRouterRequestAndWaitForReceiptAsync(string swapRouter, CancellationTokenSource cancellationToken = null)
         {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<TickLowerFunction, int>(null, blockParameter);
+            var setSwapRouterFunction = new SetSwapRouterFunction();
+                setSwapRouterFunction.SwapRouter = swapRouter;
+            
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(setSwapRouterFunction, cancellationToken);
         }
 
-        public virtual Task<int> TickUpperQueryAsync(TickUpperFunction tickUpperFunction, BlockParameter blockParameter = null)
+        public Task<string> SwapRouterQueryAsync(SwapRouterFunction swapRouterFunction, BlockParameter blockParameter = null)
         {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<TickUpperFunction, int>(tickUpperFunction, blockParameter);
+            return ContractHandler.QueryAsync<SwapRouterFunction, string>(swapRouterFunction, blockParameter);
         }
 
-        public virtual Task<int> TickUpperQueryAsync(BlockParameter blockParameter = null)
+        
+        public Task<string> SwapRouterQueryAsync(BlockParameter blockParameter = null)
         {
-            EnsureInitialized();
-            return ContractHandler.QueryAsync<TickUpperFunction, int>(null, blockParameter);
+            return ContractHandler.QueryAsync<SwapRouterFunction, string>(null, blockParameter);
         }
 
-        public virtual Task<string> TransferOwnershipRequestAsync(TransferOwnershipFunction transferOwnershipFunction)
+        public Task<string> TransferOwnershipRequestAsync(TransferOwnershipFunction transferOwnershipFunction)
         {
-            EnsureInitialized();
-            return ContractHandler.SendRequestAsync(transferOwnershipFunction);
+             return ContractHandler.SendRequestAsync(transferOwnershipFunction);
         }
 
-        public virtual Task<TransactionReceipt> TransferOwnershipRequestAndWaitForReceiptAsync(TransferOwnershipFunction transferOwnershipFunction, CancellationTokenSource cancellationToken = null)
+        public Task<TransactionReceipt> TransferOwnershipRequestAndWaitForReceiptAsync(TransferOwnershipFunction transferOwnershipFunction, CancellationTokenSource cancellationToken = null)
         {
-            EnsureInitialized();
-            return ContractHandler.SendRequestAndWaitForReceiptAsync(transferOwnershipFunction, cancellationToken);
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(transferOwnershipFunction, cancellationToken);
         }
 
-        public virtual Task<string> TransferOwnershipRequestAsync(string newOwner)
+        public Task<string> TransferOwnershipRequestAsync(string newOwner)
         {
-            EnsureInitialized();
             var transferOwnershipFunction = new TransferOwnershipFunction();
                 transferOwnershipFunction.NewOwner = newOwner;
             
-            return ContractHandler.SendRequestAsync(transferOwnershipFunction);
+             return ContractHandler.SendRequestAsync(transferOwnershipFunction);
         }
 
-        public virtual Task<TransactionReceipt> TransferOwnershipRequestAndWaitForReceiptAsync(string newOwner, CancellationTokenSource cancellationToken = null)
+        public Task<TransactionReceipt> TransferOwnershipRequestAndWaitForReceiptAsync(string newOwner, CancellationTokenSource cancellationToken = null)
         {
-            EnsureInitialized();
             var transferOwnershipFunction = new TransferOwnershipFunction();
                 transferOwnershipFunction.NewOwner = newOwner;
             
-            return ContractHandler.SendRequestAndWaitForReceiptAsync(transferOwnershipFunction, cancellationToken);
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(transferOwnershipFunction, cancellationToken);
+        }
+
+        public override List<Type> GetAllFunctionTypes()
+        {
+            return new List<Type>
+            {
+                typeof(BNBPositionManagerFunction),
+                typeof(WbnbFunction),
+                typeof(CreatePartyFunction),
+                typeof(HandleSwapFunction),
+                typeof(IsPartyFunction),
+                typeof(JoinPartyFunction),
+                typeof(LeavePartyFunction),
+                typeof(LpToTokenIdFunction),
+                typeof(OwnerFunction),
+                typeof(PartyFunction),
+                typeof(PositionManagerFunction),
+                typeof(RenounceOwnershipFunction),
+                typeof(SetNonfungiblePositionManagerFunction),
+                typeof(SetSwapRouterFunction),
+                typeof(SwapRouterFunction),
+                typeof(TransferOwnershipFunction)
+            };
+        }
+
+        public override List<Type> GetAllEventTypes()
+        {
+            return new List<Type>
+            {
+                typeof(OwnershipTransferredEventDTO),
+                typeof(StartPartyEventDTO)
+            };
+        }
+
+        public override List<Type> GetAllErrorTypes()
+        {
+            return new List<Type>
+            {
+                typeof(AddressEmptyCodeError),
+                typeof(AddressInsufficientBalanceError),
+                typeof(BonusGreaterThanTargetError),
+                typeof(FailedInnerCallError),
+                typeof(InsufficientBNBError),
+                typeof(LPNotAtPartyError),
+                typeof(OwnableInvalidOwnerError),
+                typeof(OwnableUnauthorizedAccountError),
+                typeof(PositionManagerAlreadySetError),
+                typeof(PositionManagerNotSetError),
+                typeof(ReentrancyGuardReentrantCallError),
+                typeof(SafeERC20FailedOperationError),
+                typeof(SwapRouterAlreadySetError),
+                typeof(ZeroAddressError),
+                typeof(ZeroAmountError)
+            };
         }
     }
 }
